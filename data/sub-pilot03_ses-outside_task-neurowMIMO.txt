@@ -1,0 +1,7 @@
+Folder:
+/home/NeurAugVR/data/Lisbon_data/NeurAugVR_PILOTS/sub-03/ses-outside/eeg/
+
+Files:
+sub-pilot03_ses-outside_task-neurowMIMO.eeg
+sub-pilot03_ses-outside_task-neurowMIMO.vhdr
+sub-pilot03_ses-outside_task-neurowMIMO.vmrk

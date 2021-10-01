@@ -4,7 +4,7 @@ addpath('C:/Users/guta_/Documents/MATLAB/eeglab2021.0')
 varsbefore = who; eeglab; varsnew = []; varsnew = setdiff(who, varsbefore); clear(varsnew{:})
 
 %% Load
-load('./data/EEG.mat','EEG');
+EEG = pop_loadbv('..\data\', 'sub-pilot03_ses-outside_task-neurowMIMO.vhdr', [], []);
 
 %% Preprocess (prep. 1)
 bandlims = [1, 40];
