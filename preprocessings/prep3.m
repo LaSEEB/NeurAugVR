@@ -1,0 +1,58 @@
+function EEG = prep3(EEG,resamp,hp,lp)
+% E.g.:
+% resamp = 250
+% hp = 1
+% lp = 40
+
+%% Remove ECG
+EEG = pop_select(EEG, 'nochannel',{'ECG','EKG'});
+
+%% Resample
+if ~isempty(resamp)
+    if EEG.srate ~= resamp
+        EEG = pop_resample(EEG, resamp);
+    end
+end
+
+%% Filter
+EEG = pop_eegfiltnew(EEG, 'locutoff',hp, 'plotfreqz',0);
+EEG = pop_eegfiltnew(EEG, 'hicutoff',lp, 'plotfreqz',0);
+
+%% Save keep channels
+keep_chans = {'C3','C4'};
+chns = Find_channels(EEG, keep_chans);
+chans_data = [];
+chans_locs = [];
+for chi = 1:numel(keep_chans)
+    chns(chi)
+    chans_data = [chans_data; EEG.data(chns(chi),:)];
+    chans_locs = [chans_locs; EEG.chanlocs(chns(chi))];
+end
+
+%% Remove bad channels
+EEGallchans = EEG;
+EEG = pop_clean_rawdata(EEG, 'FlatlineCriterion',10,'ChannelCriterion',0.8,'LineNoiseCriterion',5,'Highpass','off','BurstCriterion','off','WindowCriterion','off','BurstRejection','off','Distance','Euclidian');
+% EEG = pop_select(EEG, 'nochannel',{'C3','EKG'}); % DEBUG
+prep_report.('chans') = {EEGallchans.chanlocs(~ismember({EEGallchans.chanlocs(:).labels},{EEG.chanlocs(:).labels})).labels};
+
+%% Add keep channels if necessary
+for chi = 1:numel(keep_chans)
+    if ~ismember(keep_chans{1},{EEG.chanlocs(:).labels})
+        EEG.nbchan = EEG.nbchan+1;
+        EEG.data(end+1,:) = chans_data(chi,:);
+        EEG.chanlocs(1,EEG.nbchan)= chans_locs(chi);
+    end
+end
+EEG = eeg_checkset(EEG);
+
+%% Interpolate channels
+EEG = pop_interp(EEG, EEGallchans.chanlocs, 'spherical');
+
+%% Re-reference
+EEG = fullRankAveRef(EEG);
+fprintf(strcat('Prep 3 report\nChans removed: ',repmat('%s ',1,numel(prep_report.('chans'))),'\n'),prep_report.('chans'){:});
+EEG.preproc = prep_report;
+
+end
+
+
