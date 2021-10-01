@@ -5,7 +5,7 @@ addpath(genpath('./interactiveQRS'))
 varsbefore = who; eeglab; varsnew = []; varsnew = setdiff(who, varsbefore); clear(varsnew{:})
 
 %% Load
-load('../data/sub-03_ses-inside_task-neurowMIMO_run-01.mat','EEG');
+EEG = pop_loadbv('..\data\', 'sub-03_ses-inside_task-neurowMIMO_run-01.vhdr', [], []);
 
 %% Correct GA
 Win = 30;

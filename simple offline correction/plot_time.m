@@ -3,7 +3,7 @@ blue_col = [0 0.4470 0.7410];
 signal = EEG.data(chan,:);
 plot(EEG.times/1000, signal, 'Color', blue_col);
 hold on
-markers = {'S  1','S  2','S  5','L','R','S 10','S 11','S 12'};
+markers = {'S  1','S  2','S  5','S  7','S  8','S 10','S 11','S 12'};
 cols = jet(numel(markers));
 for m = 1:numel(markers)
     lats = [EEG.event(strcmp({EEG.event(:).type},markers{m})).latency];
