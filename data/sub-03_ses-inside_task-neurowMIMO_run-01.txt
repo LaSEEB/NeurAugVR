@@ -1,0 +1,7 @@
+Folder:
+/home/NeurAugVR/data/Lisbon_data/NeurAugVR_PILOTS/sub-03/ses-inside/eeg/
+
+Files:
+sub-03_ses-inside_task-neurowMIMO_run-01.eeg
+sub-03_ses-inside_task-neurowMIMO_run-01.vhdr
+sub-03_ses-inside_task-neurowMIMO_run-01.vmrk
