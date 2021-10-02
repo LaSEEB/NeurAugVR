@@ -16,7 +16,7 @@ EEG = pop_eegfiltnew(EEG, 'hicutoff',bandlims(2), 'plotfreqz',0);
 EEG = pop_reref(EEG, []);
 
 %% Epoch
-dire = {'S  7'}; % Left
+dire = {'S  7'};  % Left
 epochlims = [-5.5, 5.5];
 EEGdi = pop_epoch(EEG, dire, epochlims, 'epochinfo', 'yes');
 
