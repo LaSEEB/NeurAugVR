@@ -5,6 +5,7 @@ function EEG = prep6(EEG,resamp,hp,lp,dirs,elims)
 % lp = 40
 % dirs = {'S  7','S  8'}  % Left and Right
 % elims = [-5.5, 5.5] % (epoch limits [s], from arrow)
+% Obs.: This preprocessing returns an epoched EEG!
 
 %% Remove ECG
 EEG = pop_select(EEG, 'nochannel',{'ECG','EKG'});
