@@ -20,7 +20,7 @@ EEG = pop_eegfiltnew(EEG, 'hicutoff',lp, 'plotfreqz',0);
 
 %% Save keep channels
 keep_chans = {'C3','C4'};
-chns = Find_channels(EEG, keep_chans);
+chns = find(ismember({EEG.chanlocs(:).labels}, keep_chans));
 chans_data = [];
 chans_locs = [];
 for chi = 1:numel(keep_chans)
@@ -57,7 +57,7 @@ EEG = fullRankAveRef(EEG);
 %% Discard channels to make the data full ranked
 if rank_deficit > 0
     keep_chans = {'C3','C4'};
-    chns = Find_channels(EEG, keep_chans);
+    chns = find(ismember({EEG.chanlocs(:).labels}, keep_chans));
     channelSubset = loc_subsets(EEG.chanlocs, EEG.nbchan-rank_deficit,false,false,{chns});
     EEG = pop_select( EEG,'channel', channelSubset{1});
     EEG = pop_chanedit(EEG, 'eval','chans = pop_chancenter( chans, [],[]);');

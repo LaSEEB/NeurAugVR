@@ -20,7 +20,7 @@ EEG = pop_eegfiltnew(EEG, 'hicutoff',lp, 'plotfreqz',0);
 
 %% Save keep channels
 keep_chans = {'C3','C4'};
-chns = Find_channels(EEG, keep_chans);
+chns = find(ismember({EEG.chanlocs(:).labels}, keep_chans));
 chans_data = [];
 chans_locs = [];
 for chi = 1:numel(keep_chans)

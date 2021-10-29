@@ -3,8 +3,8 @@ function EEG = prep6(EEG,resamp,hp,lp,dirs,elims)
 % resamp = 250
 % hp = 1
 % lp = 40
-% dirs: {'L','R'}
-% elims: [-5.5, 5.5] (epoch limits [s], from arrow)
+% dirs = {'S  7','S  8'}  % Left and Right
+% elims = [-5.5, 5.5] % (epoch limits [s], from arrow)
 
 %% Remove ECG
 EEG = pop_select(EEG, 'nochannel',{'ECG','EKG'});
@@ -22,7 +22,7 @@ EEG = pop_eegfiltnew(EEG, 'hicutoff',lp, 'plotfreqz',0);
 
 % Save keep channels
 keep_chans = {'C3','C4'};
-chns = Find_channels(EEG, keep_chans);
+chns = find(ismember({EEG.chanlocs(:).labels}, keep_chans));
 chans_data = [];
 chans_locs = [];
 for chi = 1:numel(keep_chans)
@@ -59,7 +59,7 @@ EEG = fullRankAveRef(EEG);
 % Discard channels to make the data full ranked
 if rank_deficit > 0
     keep_chans = {'C3','C4'};
-    chns = Find_channels(EEG, keep_chans);
+    chns = find(ismember({EEG.chanlocs(:).labels}, keep_chans));
     channelSubset = loc_subsets(EEG.chanlocs, EEG.nbchan-rank_deficit,false,false,{chns});
     EEG = pop_select( EEG,'channel', channelSubset{1});
     EEG = pop_chanedit(EEG, 'eval','chans = pop_chancenter( chans, [],[]);');
@@ -108,8 +108,9 @@ plotflag = 0;
 [EEG, ~, ~, nrej2] = pop_rejkurt(EEG, typerej, elec_comp,locthresh, globthresh, superpose, reject, vistype);
 
 % Report
-prep_report.('trialsL') = sum(strcmp({EEGdi.event(:).type}, 'L')) - sum(strcmp({EEG.event(:).type}, 'L'));
-prep_report.('trialsR') = sum(strcmp({EEGdi.event(:).type}, 'R')) - sum(strcmp({EEG.event(:).type}, 'R'));
+for di = 1:numel(dirs)
+    prep_report.(strcat('trials', regexprep(dirs{di}, ' ', '_'))) = sum(strcmp({EEGdi.event(:).type}, dirs{di})) - sum(strcmp({EEG.event(:).type}, dirs{di}));
+end
 prep_report.('trials') = EEGdi.trials - EEG.trials;
 prep_report.('trialsP') = prep_report.('trials')/EEGdi.trials*100;
 prep_report.('total_trials') = EEGdi.trials;
