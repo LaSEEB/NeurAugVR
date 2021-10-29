@@ -6,7 +6,7 @@ chn = find(ismember({EEG.chanlocs(:).labels}, chan));
 vol_lats = [EEG.event(strcmp({EEG.event(:).type},vol_event)).latency];
 nvols = numel(vol_lats);
 avg_lat_dif = sum(diff(vol_lats))/(nvols-1);
-vol_lats = [vol_lats, vol_lats(end) + avg_lat_dif];  % Add an extra latency at the end, to calculate the power of the last volume
+vol_lats = [vol_lats, vol_lats(end) + avg_lat_dif -1];  % Add an extra latency at the end, to calculate the power of the last volume
 
 % Power
 pow_vecs = zeros(size(bands, 1),nvols);
