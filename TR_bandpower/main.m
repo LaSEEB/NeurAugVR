@@ -45,6 +45,11 @@ EEG = prep8(EEG,resamp,hp,lp);
 clc
 [tr_vecs, pow_vecs] = tfiltpower(EEG, chan, vol_event, bands);
 
+%% C) Band-task mean ERSP for each <trial_ntr> TRs
+trial_ntr = 10;
+trial_tr_id = 1;
+[tr_vecs, ersp_vecs] = tfERSP(EEG, chan, vol_event, bands, trial_ntr, trial_tr_id);
+
 %% Plot
 figure
 for b = 1:size(bands,1)
