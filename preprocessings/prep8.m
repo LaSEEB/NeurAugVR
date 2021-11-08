@@ -3,7 +3,6 @@ function EEG = prep8(EEG,resamp,hp,lp)
 % resamp = 250
 % hp = 1
 % lp = 40
-% Obs.: This preprocessing returns an epoched EEG!
 
 %% Remove ECG
 EEG = pop_select(EEG, 'nochannel',{'ECG','EKG'});
