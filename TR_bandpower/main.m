@@ -47,7 +47,7 @@ clc
 
 %% C) Band-task mean ERSP for each <trial_ntr> TRs
 trial_ntr = 10;
-trial_tr_id = 1;
+trial_tr_id = 8;
 [tr_vecs, ersp_vecs] = tfERSP(EEG, chan, vol_event, bands, trial_ntr, trial_tr_id);
 
 %% Plot
