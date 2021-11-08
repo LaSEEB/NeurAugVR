@@ -1,11 +1,8 @@
-function EEG = prep7(EEG,resamp,hp,lp,dirs,elims,ereject)
+function EEG = prep8(EEG,resamp,hp,lp)
 % E.g.:
 % resamp = 250
 % hp = 1
 % lp = 40
-% dirs = {'S  7','S  8'}  % Left and Right
-% elims = [-5.5, 5.5] % (epoch limits [s], from arrow)
-% ereject = true % true rejects epochs, false just marks them
 % Obs.: This preprocessing returns an epoched EEG!
 
 %% Remove ECG
@@ -67,49 +64,42 @@ if rank_deficit > 0
     EEG = pop_chanedit(EEG, 'eval','chans = pop_chancenter( chans, [],[]);');
 end
 
-%% Epoch
-EEG = pop_epoch(EEG, dirs, elims, 'epochinfo', 'yes');
-
+%% Continuous clean
+EEGtemp = pop_clean_rawdata(EEG, 'FlatlineCriterion','off','ChannelCriterion','off','LineNoiseCriterion','off','Highpass','off','BurstCriterion',20,'WindowCriterion',0.5,'BurstRejection','on','Distance','Euclidian','WindowCriterionTolerances',[-Inf 8] );
+prep_report.('bursts_bICA') = EEG.xmax - EEGtemp.xmax; 
+prep_report.('burstsP_bICA') = prep_report.('bursts_bICA')/EEG.xmax*100;
+            
 %% ICA
-EEG = pop_runica(EEG, 'icatype', 'runica','extended',1,'interrupt','on');
+EEGtemp = pop_runica(EEGtemp, 'icatype', 'runica','extended',1,'interrupt','on');
+
+%% Weight transfer
+EEG.icaweights = EEGtemp.icaweights;
+EEG.icasphere = EEGtemp.icasphere;
+EEG.icachansind = EEGtemp.icachansind;
+EEG.icawinv = EEGtemp.icawinv;
 
 %% Prun
 EEG = iclabel(EEG);
 iclabel_mat = EEG.etc.ic_classification.ICLabel.classifications; % n*7 matrix where n=number of IC's and 7=number o classes
 thres = 0.85; % 90% o.o
-ica_rej_vec = [];
+rej_vec = [];
 for n = 1:size(iclabel_mat,1) % For each IC, determine if it is to reject
     [val, idx] = max(iclabel_mat(n, :));
     if val >= thres && (idx == 2 || idx == 3)
-        ica_rej_vec = [ica_rej_vec, n];
+        rej_vec = [rej_vec, n];
     end
 end
-EEG = pop_subcomp(EEG, ica_rej_vec, 0);
-prep_report.('comps') = numel(ica_rej_vec);
+EEG = pop_subcomp(EEG, rej_vec, 0);
+prep_report.('comps') = numel(rej_vec);
 
-%% Clean trials
-EEGtemp = EEG;
-typerej = 1;                % On EEG and not ICA components
-elec_comp = 1:EEG.nbchan;
-locthresh = 3;
-globthresh = 3;
-superpose = 1;              % Different than default
-vistype = 0;
-plotflag = 0;
-[EEG, ~, ~, nrej1] = pop_jointprob(EEG, typerej, elec_comp, locthresh, globthresh, superpose, reject, vistype,[],plotflag);
-[EEG, ~, ~, nrej2] = pop_rejkurt(EEG, typerej, elec_comp,locthresh, globthresh, superpose, ereject, vistype);
+%% Continuous clean: remove and interpolate bursts
+EEGtemp = pop_clean_rawdata(EEG, 'FlatlineCriterion','off','ChannelCriterion','off','LineNoiseCriterion','off','Highpass','off','BurstCriterion',20,'WindowCriterion','off','BurstRejection','off','Distance','Euclidian');
+prep_report.('bursts_aICA_rej_mask') = sum(abs(EEG.data-EEGtemp.data),1) >= 1e-10;
+prep_report.('bursts_aICA') = sum(prep_report.('bursts_aICA_rej_mask'))/EEG.srate;
+prep_report.('burstsP_aICA') = prep_report.('bursts_aICA')/EEG.xmax*100;
 
-for di = 1:numel(dirs)
-    prep_report.(strcat('trials', regexprep(dirs{di}, ' ', '_'))) = sum(strcmp({EEGdi.event(:).type}, dirs{di})) - sum(strcmp({EEG.event(:).type}, dirs{di}));
-end
-prep_report.('trials') = EEGtemp.trials - EEG.trials;
-prep_report.('trialsP') = prep_report.('trials')/EEGtemp.trials*100;
-prep_report.('total_trials') = EEGtemp.trials;
-prep_report.('trials_rej_mask') = EEG.reject.rejjp | EEG.reject.rejkurt;
-
-fprintf(strcat('Prep 7 report\nChans removed: ',repmat('%s ',1,numel(prep_report.('chans'))),'\nComps removed: %d\nTrials removed: %0.0f / %d  (%0.0f%%)\n'),prep_report.('chans'){:},prep_report.('comps'),prep_report.('trials'),prep_report.('total_trials'),prep_report.('trialsP'));
+%% Report
+fprintf(strcat('Prep 8 report\nChans removed: ',repmat('%s ',1,numel(prep_report.('chans'))),'\nBursts removed before ICA: %0.0f (%0.0f%%)\nComps removed: %d\nBursts removed after ICA: %0.0f (%0.0f%%)\n'),prep_report.('chans'){:},prep_report.('bursts_bICA'),prep_report.('burstsP_bICA'),prep_report.('comps'),prep_report.('bursts_aICA'),prep_report.('burstsP_aICA'));
 EEG.preproc = prep_report;
 
 end
-
-

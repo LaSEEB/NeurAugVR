@@ -1,10 +1,11 @@
-function EEG = prep5(EEG,resamp,hp,lp,dirs,elims)
+function EEG = prep5(EEG,resamp,hp,lp,dirs,elims,ereject)
 % E.g.:
 % resamp = 250
 % hp = 1
 % lp = 40
 % dirs = {'S  7','S  8'}  % Left and Right
 % elims = [-5.5, 5.5] % (epoch limits [s], from arrow)
+% ereject = true % true rejects epochs, false keeps them (and marks them)
 % Obs.: This preprocessing returns an epoched EEG!
 
 %% Remove ECG
@@ -94,11 +95,11 @@ elec_comp = 1:EEGdi.nbchan;
 locthresh = 3;
 globthresh = 3;
 superpose = 1;              % Different than default
-reject = 1;
+% ereject = 1;
 vistype = 0;
 plotflag = 0;
-[EEG, ~, ~, nrej1] = pop_jointprob(EEGdi, typerej, elec_comp, locthresh, globthresh, superpose, reject, vistype,[],plotflag);
-[EEG, ~, ~, nrej2] = pop_rejkurt(EEG, typerej, elec_comp,locthresh, globthresh, superpose, reject, vistype);
+[EEG, ~, ~, nrej1] = pop_jointprob(EEGdi, typerej, elec_comp, locthresh, globthresh, superpose, ereject, vistype,[],plotflag);
+[EEG, ~, ~, nrej2] = pop_rejkurt(EEG, typerej, elec_comp,locthresh, globthresh, superpose, ereject, vistype);
 
 %% Report
 for di = 1:numel(dirs)
@@ -107,6 +108,7 @@ end
 prep_report.('trials') = EEGdi.trials - EEG.trials;
 prep_report.('trialsP') = prep_report.('trials')/EEGdi.trials*100;
 prep_report.('total_trials') = EEGdi.trials;
+prep_report.('trials_rej_mask') = EEG.reject.rejjp | EEG.reject.rejkurt;
 
 fprintf(strcat('Prep 5 report\nChans removed: ',repmat('%s ',1,numel(prep_report.('chans'))),'\nComps removed: %d\nTrials removed: %0.0f / %d  (%0.0f%%)\n'),prep_report.('chans'){:},prep_report.('comps'),prep_report.('trials'),prep_report.('total_trials'),prep_report.('trialsP'));
 EEG.preproc = prep_report;
