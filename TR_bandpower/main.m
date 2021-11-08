@@ -51,10 +51,11 @@ trial_tr_id = 1;
 [tr_vecs, ersp_vecs] = tfERSP(EEG, chan, vol_event, bands, trial_ntr, trial_tr_id);
 
 %% Plot
+plot_vecs = pow_vecs;
 figure
 for b = 1:size(bands,1)
     subplot(numel(band_names), 1, b)
-    plot(tr_vecs(1,:), pow_vecs(b,:))
+    plot(tr_vecs(1,:), plot_vecs(b,:))
     ylabel(band_names{b})
     if b == 1, title('TR-bandpower'); end
 end
