@@ -5,29 +5,33 @@ varsbefore = who; eeglab; varsnew = []; varsnew = setdiff(who, varsbefore); clea
 
 %% Load (offline-corrected)
 % load('sub-03_ses-inside_task-grazMI_run-01_EEGPA.mat','EEG')
+load('sub-04_ses-inside_task-grazMIMO_run-0001_PAcorrected-obs.mat','EEGPAR') % fix 1: EEG -> EEGPAR
+EEG = EEGPAR;
 
 %% Set
 chan = 'C3';
 bands = [1, 4; 4, 8; 8, 13; 13, 30];
 band_names = {'Delta', 'Theta', 'Alpha', 'Beta'};
-vol_event = 'Vol Start';
+vol_event = 'Scan Start'; % 'Vol Start'/'Scan Start'
 
 %% A) Prep 5 (marks bad TRs)
 resamp = 250; 
 hp = 1;
 lp = 40;
-elims = [0, 1.26];
+elims = [0, 1.26 - 1/EEG.srate];
 ereject = false;
 EEGtr = prep5(EEG,resamp,hp,lp,{vol_event},elims,ereject);
+EEGtr = remove_event_repetitions(EEGtr); % If epochs overlap and events get counted twice (should not happen if epoching interval is correct), remove repetitions
 EEG = undo_epochs(EEGtr); % To see bad TRs: EEG.prep_report.('trials_rej_mask')
 
 %% B) Prep 6 (marks bad TRs) (similar to prep 5, skip testing if you wish)
 % resamp = 250; 
 % hp = 1;
 % lp = 40;
-% elims = [0, 1.26];
+% elims = [0, 1.26 - 1/EEG.srate];
 % ereject = false;
 % EEGtr = prep6(EEG,resamp,hp,lp,{vol_event},elims,ereject);
+% EEGtr = remove_event_repetitions(EEGtr); % If epochs overlap and events get counted twice (should not happen if epoching interval is correct), remove repetitions
 % EEG = undo_epochs(EEGtr); % To see bad TRs: EEG.prep_report.('trials_rej_mask')
 
 %% C) Prep 8 (reconstructs bad periods)
@@ -38,6 +42,7 @@ EEG = prep8(EEG,resamp,hp,lp);
 
 %% A) Use bandpower() on each TR
 % Calculate
+
 [tr_vecs, pow_vecs] = tbandpower(EEG, chan, vol_event, bands);
 
 %% B) Bandpass signal and then calculate power for each TR

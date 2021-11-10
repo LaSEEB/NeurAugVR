@@ -83,7 +83,7 @@ for n = 1:size(iclabel_mat,1) % For each IC, determine if it is to reject
 end
 EEG = pop_subcomp(EEG, rej_vec, 0);
 
-%% Report
+% Report
 prep_report.('comps') = numel(rej_vec);
 
 %% Epoch

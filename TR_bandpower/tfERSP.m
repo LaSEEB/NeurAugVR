@@ -1,4 +1,4 @@
-function [tr_vecs, ersp_vecs] = tfERD(EEG, chan, vol_event, bands, trial_ntr, trial_tr_id)
+function [tr_vecs, ersp_vecs] = tfERSP(EEG, chan, vol_event, bands, trial_ntr, trial_tr_id)
 % E.g.:
 % chan = 'C3';
 % bands = [1, 4; 4, 8; 8, 13; 13, 30];
@@ -12,12 +12,11 @@ chn = find(ismember({EEG.chanlocs(:).labels}, chan));
 % Volume latencies
 vol_lats = [EEG.event(strcmp({EEG.event(:).type},vol_event)).latency];
 nvols = numel(vol_lats);
-avg_lat_dif = sum(diff(vol_lats))/(nvols-1);
-vol_lats = [vol_lats, vol_lats(end) + avg_lat_dif];  % Add an extra latency at the end, to calculate the power of the last volume
 
 tr = 1.26;
 fs = EEG.srate;
 tr_len = tr * fs;
+vol_lats = [vol_lats, vol_lats(end) + tr_len];  % Add an extra latency at the end, to calculate the power of the last volume
 
 base_ntr = floor(trial_ntr/2); % the rest of trial-tr's are considered task
 base_len = base_ntr * tr_len;
@@ -35,7 +34,10 @@ ylims = [0, 30];
 for v = 1:numel(vol_lats) - trial_ntr
     %% Get trial
     start = vol_lats(v);
-    finish = vol_lats(v+trial_ntr);
+    finish = vol_lats(v+trial_ntr) - 1;
+    if v == numel(vol_lats) - trial_ntr
+        lala=0;
+    end
     tubmat = double(EEG.data(chn, start:finish)); % I use the word 'tub' for a 1x1xN array, and 'tubmat' for a 1xMxN array
     timelims = [EEG.times(start) EEG.times(finish)] - EEG.times(start+base_len);
     
@@ -63,12 +65,13 @@ end
 
 % Add missing start- and finish- TRs with 0 ERDs
 ersp_vecs = [zeros(size(bands,1),trial_tr_id-1), ersp_vecs, zeros(size(bands,1),trial_ntr-trial_tr_id)];
-% tr_vec = [1:trial_tr_id-1, tr_vec, tr_vec(end)+1:tr_vec(end)+trial_ntr-trial_tr_id];
 % Add times, with 0 in first TR
 tr_vecs(1,:) = 1:nvols;
 tr_vecs(2,:) = (EEG.times(vol_lats(tr_vecs(1,:))) - EEG.times(vol_lats(1)))/1000;
 
-
-% tr_vecs = [tr_vec; (EEG.times(vol_lats(tr_vec)) - EEG.times(vol_lats(1)))/1000];
+% Normalize ERSP vecs
+for b = 1:size(bands,1)
+    ersp_vecs(b,:) = -1 + 2.*(ersp_vecs(b,:) - min(ersp_vecs(b,:)))./(max(ersp_vecs(b,:)) - min(ersp_vecs(b,:)));
+end
 
 end

@@ -67,7 +67,8 @@ end
 EEGtemp = pop_clean_rawdata(EEG, 'FlatlineCriterion','off','ChannelCriterion','off','LineNoiseCriterion','off','Highpass','off','BurstCriterion',20,'WindowCriterion',0.5,'BurstRejection','on','Distance','Euclidian','WindowCriterionTolerances',[-Inf 8] );
 prep_report.('bursts_bICA') = EEG.xmax - EEGtemp.xmax; 
 prep_report.('burstsP_bICA') = prep_report.('bursts_bICA')/EEG.xmax*100;
-            
+     
+
 %% ICA
 EEGtemp = pop_runica(EEGtemp, 'icatype', 'runica','extended',1,'interrupt','on');
 
@@ -77,7 +78,7 @@ EEG.icasphere = EEGtemp.icasphere;
 EEG.icachansind = EEGtemp.icachansind;
 EEG.icawinv = EEGtemp.icawinv;
 
-%% Prun
+% Prun
 EEG = iclabel(EEG);
 iclabel_mat = EEG.etc.ic_classification.ICLabel.classifications; % n*7 matrix where n=number of IC's and 7=number o classes
 thres = 0.85; % 90% o.o
