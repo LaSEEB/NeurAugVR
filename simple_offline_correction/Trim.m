@@ -6,14 +6,14 @@ elseif strcmp(units, 'idx')
     idx1 = lims(1);
     idx2 = lims(2);
 elseif strcmp(units, 'marker')
-    idx1 = EEGX.event(find(strcmp({EEGX.event(:).type},lims(1)),1,'first')).latency;
-    idx2 = EEGX.event(find(strcmp({EEGX.event(:).type},lims(2)),1,'last')).latency - 1000; % -1000, CAREFUL
+    idx1 = EEGX.event(find(strcmp({EEGX.event(:).type},lims{1,1}),1,'first')).latency + lims{2,1}; % lims{2,:} is the shift in points from the marker
+    idx2 = EEGX.event(find(strcmp({EEGX.event(:).type},lims{1,2}),1,'last')).latency + lims{2,2}; % -1000, CAREFUL 
 end
 
 % cut data
 EEGCUT = EEGX;
 EEGCUT.data = EEGX.data(:, idx1:idx2);
-EEGCUT.times = EEGX.times(:, idx1:idx2);
+EEGCUT.times = EEGX.times(:, idx1:idx2); 
 EEGCUT.xmin = EEGCUT.times(1)/1000;
 EEGCUT.xmax = EEGCUT.times(end)/1000;
 % EEGCUT.time = 1:length(EEGCUT.data)/EEGGAR.srate;
