@@ -50,12 +50,12 @@ EEG = prep8(EEG,resamp,hp,lp);
 
 %% C) Band-task mean ERSP
 % Slide through TR's
-onsets = [EEG.event(strcmp({EEG.event(:).type},'Scan Start')).latency];
-trial = [-4, 4] * 1.26;  % s
+% onsets = [EEG.event(strcmp({EEG.event(:).type},'Scan Start')).latency];
+% trial = [-4, 4] * 1.26;  % s
 
 % Slide through every point
-% onsets = 1:size(EEG.data,2);
-% trial = [-5, 5];  % s
+onsets = 1:size(EEG.data,2);
+trial = [-5, 5];  % s
 
 time_id = 1.75;  % Each ERSP will be saved in the segment at time_id s (e.g.: 1.75s) inside the trial (0s represents the cross appearing)
 
