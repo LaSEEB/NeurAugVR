@@ -7,7 +7,7 @@ elseif strcmp(units, 'idx')
     idx2 = lims(2);
 elseif strcmp(units, 'marker')
     idx1 = EEGX.event(find(strcmp({EEGX.event(:).type},lims{1,1}),1,'first')).latency + lims{2,1}; % lims{2,:} is the shift in points from the marker
-    idx2 = EEGX.event(find(strcmp({EEGX.event(:).type},lims{1,2}),1,'last')).latency + lims{2,2}; % -1000, CAREFUL 
+    idx2 = EEGX.event(find(strcmp({EEGX.event(:).type},lims{1,2}),1,'last')).latency + lims{2,2};
 end
 
 % cut data

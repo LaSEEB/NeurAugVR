@@ -1,4 +1,4 @@
-function [fig, EEGtrim]  = vol_markers_ines(EEG, TR, thr, etype)
+function EEG  = vol_markers_ines(EEG, TR, thr, etype)
 
 % highPassFilter = 1;  % Hz
 % data = pop_eegfiltnew(EEG, highPassFilter, []);
@@ -83,6 +83,9 @@ if ~all(abs(timings-TR*fs) < 100)
     ids = [ids(abs(timings-TR*fs) < 100), ids(end)];
 end
 
+% Exclude dummy ids
+ids = ids(3:end);
+
 % Update EEG
 temp_array = EEG.event(1);
 for i = 1:size(ids,2)
@@ -96,61 +99,65 @@ for i = 1:size(EEG.event,2)
     EEG.event(i).urevent = i;
 end
 
-% Trim
-% trim_lims = [ids(3)+1,ids(end-1)-1]; % Trim from 3rd vol-marker to 2nd-to-last
-% trim_lims = [ids(3),ids(end-1)]; % Trim from 3rd vol-marker to 2nd-to-last (inclusive!)
-% trim_lims = [ids(3),size(EEG.data,2)]; % Trim from 3rd vol-marker to 2nd-to-last (inclusive!)
-trim_lims = [ids(3),ids(end)]; % Trim from 3rd vol-marker to 2nd-to-last (inclusive!)
-EEGtrim = Trim(EEG, trim_lims, 'idx');
-EEGtrim_begining = Trim(EEG, [1, trim_lims(1)-1], 'idx');
-EEGtrim_ending = Trim(EEG, [trim_lims(2)+1, size(EEG.data,2)], 'idx');
-
-%% Final plot with volumes
-fig = 0;
-% fig = figure;
-% Deleted begining
-ids_begining = [EEGtrim_begining.event(strcmp(etype, {EEGtrim_begining.event(:).type})).latency];
-av_chan_begining = (template * [EEGtrim_begining.data]  /sum(template));
-plot(EEGtrim_begining.times/1000, av_chan_begining,'Color', [0.5,0.5,0.5])
-hold on
-plot(EEGtrim_begining.times(ids_begining)/1000, av_chan_begining(ids_begining), 'ko')
-hold on
-
-% Preserved part
-blue_col = [0 0.4470 0.7410];
-ids = [EEGtrim.event(strcmp(etype, {EEGtrim.event(:).type})).latency];
-av_chan = (template * [EEGtrim.data]  /sum(template));
-ph1 = plot(EEGtrim.times/1000, av_chan, 'Color', blue_col);
-hold on
-
-%% Plot_cues(EEGtrim)
-markers = {'S  1','S  2','S  5','L','R','S 10','S 11','S 12'};
-cols = jet(numel(markers));
-for m = 1:numel(markers)
-    lats = [EEGtrim.event(strcmp({EEGtrim.event(:).type},markers{m})).latency];
-    for lat = lats
-        plot(EEGtrim.times(lat)*[1,1]/1000,ylim,'Color',cols(m,:))
-        hold on
-    end
-end
-
-% Deleted ending
-ids_ending = [EEGtrim_ending.event(strcmp(etype, {EEGtrim_ending.event(:).type})).latency];
-av_chan_ending = (template * [EEGtrim_ending.data]  /sum(template));
-plot(EEGtrim_ending.times/1000, av_chan_ending,'Color', [0.5,0.5,0.5])
-hold on
-ph3 = plot(EEGtrim_ending.times(ids_ending)/1000, av_chan_ending(ids_ending), 'ko');
-
-% Volumes
-ph2 = plot(EEGtrim.times(ids)/1000, av_chan(ids), 'r*');
-hold on
-
-xlabel('Time [s]')
-ylabel('Amplitude [uV]')
-title(['Number of volumes: ', num2str(length(ids)+1)])
-% legend([ph1,ph2,ph3],'Average EEG', 'Volume markers', 'Excluded volume markers')
-
-%% Tare
-EEGtrim = Tare(EEGtrim);
+% % Trim
+% % trim_lims = [ids(3)+1,ids(end-1)-1]; % Trim from 3rd vol-marker to 2nd-to-last
+% % trim_lims = [ids(3),ids(end-1)]; % Trim from 3rd vol-marker to 2nd-to-last (inclusive!)
+% % trim_lims = [ids(3),size(EEG.data,2)]; % Trim from 3rd vol-marker to 2nd-to-last (inclusive!)
+% trim_lims = [ids(3),ids(end)]; % Trim from 3rd vol-marker to 2nd-to-last (inclusive!)
+% 
+% % scan_ids = [ids(3),ids(end)];
+% 
+% 
+% EEGtrim = Trim(EEG, trim_lims, 'idx');
+% EEGtrim_begining = Trim(EEG, [1, trim_lims(1)-1], 'idx');
+% EEGtrim_ending = Trim(EEG, [trim_lims(2)+1, size(EEG.data,2)], 'idx');
+% 
+% %% Final plot with volumes
+% fig = 0;
+% % fig = figure;
+% % Deleted begining
+% ids_begining = [EEGtrim_begining.event(strcmp(etype, {EEGtrim_begining.event(:).type})).latency];
+% av_chan_begining = (template * [EEGtrim_begining.data]  /sum(template));
+% plot(EEGtrim_begining.times/1000, av_chan_begining,'Color', [0.5,0.5,0.5])
+% hold on
+% plot(EEGtrim_begining.times(ids_begining)/1000, av_chan_begining(ids_begining), 'ko')
+% hold on
+% 
+% % Preserved part
+% blue_col = [0 0.4470 0.7410];
+% ids = [EEGtrim.event(strcmp(etype, {EEGtrim.event(:).type})).latency];
+% av_chan = (template * [EEGtrim.data]  /sum(template));
+% ph1 = plot(EEGtrim.times/1000, av_chan, 'Color', blue_col);
+% hold on
+% 
+% %% Plot_cues(EEGtrim)
+% markers = {'S  1','S  2','S  5','L','R','S 10','S 11','S 12'};
+% cols = jet(numel(markers));
+% for m = 1:numel(markers)
+%     lats = [EEGtrim.event(strcmp({EEGtrim.event(:).type},markers{m})).latency];
+%     for lat = lats
+%         plot(EEGtrim.times(lat)*[1,1]/1000,ylim,'Color',cols(m,:))
+%         hold on
+%     end
+% end
+% 
+% % Deleted ending
+% ids_ending = [EEGtrim_ending.event(strcmp(etype, {EEGtrim_ending.event(:).type})).latency];
+% av_chan_ending = (template * [EEGtrim_ending.data]  /sum(template));
+% plot(EEGtrim_ending.times/1000, av_chan_ending,'Color', [0.5,0.5,0.5])
+% hold on
+% ph3 = plot(EEGtrim_ending.times(ids_ending)/1000, av_chan_ending(ids_ending), 'ko');
+% 
+% % Volumes
+% ph2 = plot(EEGtrim.times(ids)/1000, av_chan(ids), 'r*');
+% hold on
+% 
+% xlabel('Time [s]')
+% ylabel('Amplitude [uV]')
+% title(['Number of volumes: ', num2str(length(ids)+1)])
+% % legend([ph1,ph2,ph3],'Average EEG', 'Volume markers', 'Excluded volume markers')
+% 
+% %% Tare
+% EEGtrim = Tare(EEGtrim);
 
 end

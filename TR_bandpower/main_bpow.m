@@ -42,26 +42,32 @@ EEG = prep8(EEG,resamp,hp,lp);
 
 %% A) Use bandpower() on each TR
 % Calculate
-
-[tr_vecs, pow_vecs] = tbandpower(EEG, chan, vol_event, bands);
+[tr_vecs, pow_vecs] = tbandpower_tr(EEG, chan, vol_event, bands);
 
 %% B) Bandpass signal and then calculate power for each TR
 % Calculate
-clc
-[tr_vecs, pow_vecs] = tfiltpower(EEG, chan, vol_event, bands);
+[tr_vecs, pow_vecs] = tfiltpower_tr(EEG, chan, vol_event, bands);
 
-%% C) Band-task mean ERSP for each <trial_ntr> TRs
-trial_ntr = 10;
-trial_tr_id = 8;
-[tr_vecs, ersp_vecs] = tfERSP(EEG, chan, vol_event, bands, trial_ntr, trial_tr_id);
+%% C) Band-task mean ERSP
+% Slide through TR's
+onsets = [EEG.event(strcmp({EEG.event(:).type},'Scan Start')).latency];
+trial = [-4, 4] * 1.26;  % s
+
+% Slide through every point
+% onsets = 1:size(EEG.data,2);
+% trial = [-5, 5];  % s
+
+time_id = 1.75;  % Each ERSP will be saved in the segment at time_id s (e.g.: 1.75s) inside the trial (0s represents the cross appearing)
+
+[x_vecs, ersp_vecs] = tfERSP(EEG, chan, onsets, bands, trial, time_id);
 
 %% Plot
-plot_vecs = pow_vecs;
+plot_vecs = ersp_vecs;
 figure
 for b = 1:size(bands,1)
     subplot(numel(band_names), 1, b)
-    plot(tr_vecs(1,:), plot_vecs(b,:))
+    plot(x_vecs(1,:), plot_vecs(b,:))
     ylabel(band_names{b})
-    if b == 1, title('TR-bandpower'); end
+    if b == 1, title('Bandpowers'); end
 end
-xlabel('TR')
+xlabel('Onset id')

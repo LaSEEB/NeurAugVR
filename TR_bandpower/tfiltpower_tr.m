@@ -1,4 +1,4 @@
-function [tr_vecs, pow_vecs] = tbandpower(EEG, chan, vol_event, bands)
+function [tr_vecs, pow_vecs] = tfiltpower_tr(EEG, chan, vol_event, bands)
 % Channel
 chn = find(ismember({EEG.chanlocs(:).labels}, chan));
 
@@ -19,12 +19,14 @@ tr_vecs(1,:) = 1:nvols;
 tr_vecs(2,:) = (EEG.times(vol_lats(tr_vecs(1,:))) - EEG.times(vol_lats(1)))/1000;
 
 % Calculate
-for b = 1:size(bands,1)
+for b = 1:size(bands, 1)
+    EEGhp = pop_eegfiltnew(EEG, 'locutoff',bands(b,1), 'plotfreqz',0);
+    EEGbp = pop_eegfiltnew(EEGhp, 'hicutoff',bands(b,2), 'plotfreqz',0);
+    
     for v = 1:numel(vol_lats)-1
-        p = bandpower(EEG.data(chn,vol_lats(v):vol_lats(v+1)-1),EEG.srate,bands(b,:));
-        pow_vecs(b,v) = p;
+        pow_vecs(b,v) = mean(EEGbp.data(chn,vol_lats(v):vol_lats(v+1)-1).^2);
     end
     pow_vecs(b,:) = -1 + 2.*(pow_vecs(b,:) - min(pow_vecs(b,:)))./(max(pow_vecs(b,:)) - min(pow_vecs(b,:)));
+    
 end
-
 end
