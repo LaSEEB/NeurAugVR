@@ -1,40 +1,61 @@
-eeglabfolder1 = '/home/mfleury/POSTDOC/LIBRAIRY/eeglab2019_0';
-eeglabfolder2 = '/home/mfleury/POSTDOC/LIBRAIRY/EEGLAB';
-
+clear, clc
+% eeglabfolder1 = '/home/mfleury/POSTDOC/LIBRAIRY/eeglab2019_0';
+% eeglabfolder2 = '/home/mfleury/POSTDOC/LIBRAIRY/EEGLAB';
+% eeglabfolder1 = 'C:/Users/guta_/Documents/MATLAB/eeglab2021.0';
+addpath(genpath('./interactiveQRS-main/'))
+addpath('./BCG_Correction_PROJIC/')
+eeglabfolder1 = '/home/gmcaetano/matlab/EEGLAB/eeglab2021.0/';
 addpath(eeglabfolder1) 
-%eeglab 
+varsbefore = who; eeglab; varsnew = []; varsnew = setdiff(who, varsbefore); clear(varsnew{:})
+
+%% Set
+% IO
+lfol = '/home/NeurAugVR/data/Lisbon_data/NeurAugVR_Study/sub-X/ses-inside1/eeg/';
+sfol = '/home/NeurAugVR/data/Lisbon_data/NeurAugVR_Study/derivates/offline_correction/sub-X/';
+
+% GA
+TR = 1.26; % repetition time in seconds
+thr = 0.018; % default threshold to find volume markers
+
+% Plots
+chan = 6;
+
+%% To make it compatible
+path = sfol;
 
 %%
+% [~, name] = system('hostname');
+% name = lower(name);
+% 
+% if strcmp(name(1:end-1), 'stromboli')
+%     path = '/home/iesteves/DataMR/Preprocessing';
+%     files = dir('/home/iesteves/DataMR/RawData/sub*020/*.vhdr');
+%     chan_loc = '/home/iesteves/MR_Correction_Pipeline/Pipelmatine/chan_loc.ced';
+% elseif strcmp(name(1:end-1), 'sesimbra')
+%     path = '/home/mfleury/POSTDOC/DATA/STUDY_NeurAugVr/pre-processing/gr_sujetssains/su_01/eeg/';
+%     files = dir('/home/mfleury/POSTDOC/DATA/STUDY_NeurAugVr/ses-inside/su_01/eeg/*.vhdr');
+%     chan_loc = '/home/mfleury/POSTDOC/LIBRAIRY/MR_Correction_Pipeline/Pipeline/chan_loc.ced';
+% end
+% 
+% % cd '/home/mfleury/POSTDOC/DATA/STUDY_NeurAugVr' % CHANGE ACCORDINGLY
+% % cd '/home/mfleury/POSTDOC/DATA/STUDY_NeurAugVr' % CHANGE ACCORDINGLY
+% cd '/home/NeurAugVR/data/Lisbon_data/NeurAugVR_Study/sub-04/ses-inside1/eeg/'
+% 
+% filenames = {files.name};
+% filefolder = {files.folder};
+% 
+% locfilepath = '/home/mfleury/POSTDOC/LIBRAIRY/MR_Correction_Pipeline/Pipeline';
+% locfilename = strcat(locfilepath, '/chan_loc.ced'); %'Chan_loc_x20t.ced';
+% 
+% % chan = 6; % change channel number for plots
+% checkfolders(path);
 
-[~, name] = system('hostname');
-name = lower(name);
+%% Load EEG file
+checkfolders(sfol);
 
-if strcmp(name(1:end-1), 'stromboli')
-    path = '/home/iesteves/DataMR/Preprocessing';
-    files = dir('/home/iesteves/DataMR/RawData/sub*020/*.vhdr');
-    chan_loc = '/home/iesteves/MR_Correction_Pipeline/Pipelmatine/chan_loc.ced';
-elseif strcmp(name(1:end-1), 'sesimbra')
-    path = '/home/mfleury/POSTDOC/DATA/STUDY_NeurAugVr/pre-processing/gr_sujetssains/su_01/eeg/';
-    files = dir('/home/mfleury/POSTDOC/DATA/STUDY_NeurAugVr/ses-inside/su_01/eeg/*.vhdr');
-    chan_loc = '/home/mfleury/POSTDOC/LIBRAIRY/MR_Correction_Pipeline/Pipeline/chan_loc.ced';
-end
-
-cd '/home/mfleury/POSTDOC/DATA/STUDY_NeurAugVr' % CHANGE ACCORDINGLY
-
+files = dir(strcat(lfol, '*.vhdr'));
 filenames = {files.name};
 filefolder = {files.folder};
-
-locfilepath = '/home/mfleury/POSTDOC/LIBRAIRY/MR_Correction_Pipeline/Pipeline';
-locfilename = strcat(locfilepath, '/chan_loc.ced'); %'Chan_loc_x20t.ced';
-
-chan = 6; % change channel number for plots
-
-
-TR = 1.26; % repetition time in seconds
-thr = 0.02; % default threshold to find volume markers
-
-checkfolders(path);
-%% Load EEG file
 
 % Convert from BrainVision original files to .mat files, without any
 % processing
@@ -43,7 +64,7 @@ for n = 1:length(filenames)
     
     filename = filenames{n}(1:end-5);
     EEG.setname = filename;
-    save([path,'/Original_mat/',filename], 'EEG');
+    save([sfol,'/Original_mat/',filename], 'EEG');
 
 end
 
@@ -58,7 +79,7 @@ for n = 1:length(filenames)
     EEG = EEGfile.EEG;
     
     % load channel location
-    EEG.chanlocs = readlocs(locfilename);
+    % EEG.chanlocs = readlocs(locfilename);
 
  
     % Read acquisition details: subject, session, task, run
@@ -207,7 +228,7 @@ for n = 1:length(filenames)
     EEGQRS = EEGQRSfile.EEGQRS;
     
     pop_editoptions('option_computeica', 1 );
-    EEGICA = pop_runica(EEGQRS, 'icatype', 'runica', 'chanind', 1:ecg_chan, 'extended', 1);
+    EEGICA = pop_runica(EEGQRS, 'icatype', 'runica', 'chanind', 1:ecg_chan-1, 'extended', 1);
 
     save([path, '/ICA/', filename, '_ica'], 'EEGICA')
 end
