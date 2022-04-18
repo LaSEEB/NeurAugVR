@@ -1,5 +1,5 @@
 %% Add
-addpath('C:/Users/guta_/Documents/MATLAB/eeglab2021.0')
+addpath('C:/Users/guta_/Documents/MATLAB/eeglab2021.0')  % Change according to the computer
 varsbefore = who; eeglab; close; varsnew = []; varsnew = setdiff(who, varsbefore); clear(varsnew{:})
 
 %% Load
