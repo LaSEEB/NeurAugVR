@@ -11,12 +11,11 @@ load(data_path,'EEG');
 %% Update
 if isempty(EEG.chanlocs)  % Insert chanloc struct
     EEG.chanlocs = chanlocs;
-else
+else  % Insert chanloc struct matching the label order of already existing EEG.chanloc
     chanlocs_temp = [];
-    for chi = 1:numel(EEG.chanlocs)  % Insert chanloc struct matching the label order of already existing EEG.chanloc
+    for chi = 1:numel(EEG.chanlocs)
         chanlocs_temp = [chanlocs_temp, chanlocs(ismember({chanlocs(:).labels}, EEG.chanlocs(chi).labels))];
     end
-    
     EEG.chanlocs = chanlocs_temp;
 end
 
