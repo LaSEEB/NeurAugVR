@@ -1,8 +1,14 @@
-function EEG = prep8(EEG,resamp,hp,lp)
-% E.g.:
+function EEG = prep8(EEG,resamp,hp,lp,no_interp_chans,no_discard_chans)
+% E.g. 1:
 % resamp = 250
 % hp = 1
 % lp = 40
+% no_interp_chans = {'C3', 'C4'} (do not interpolate)
+% no_discard_chans = {'C3', 'C4'} (do not discard to make data fully-rank)
+
+% E.g. 2:
+% no_interp_chans = {}
+% no_discard_chans = 'all'
 
 %% Remove ECG
 EEG = pop_select(EEG, 'nochannel',{'ECG','EKG'});
@@ -18,13 +24,15 @@ end
 EEG = pop_eegfiltnew(EEG, 'locutoff',hp, 'plotfreqz',0);
 EEG = pop_eegfiltnew(EEG, 'hicutoff',lp, 'plotfreqz',0);
 
-%% Save keep channels
-keep_chans = {'C3','C4'};
-chns = find(ismember({EEG.chanlocs(:).labels}, keep_chans));
+%% Save no-interp-chans channels
+if isequal(no_interp_chans, 'all')
+    no_interp_chans = {EEG.chanlocs(:).labels};
+end
+
+chns = find(ismember({EEG.chanlocs(:).labels}, no_interp_chans));
 chans_data = [];
 chans_locs = [];
-for chi = 1:numel(keep_chans)
-    chns(chi)
+for chi = 1:numel(no_interp_chans)
     chans_data = [chans_data; EEG.data(chns(chi),:)];
     chans_locs = [chans_locs; EEG.chanlocs(chns(chi))];
 end
@@ -35,9 +43,9 @@ EEG = pop_clean_rawdata(EEG, 'FlatlineCriterion',10,'ChannelCriterion',0.8,'Line
 % EEG = pop_select(EEG, 'nochannel',{'C3','EKG'}); % DEBUG
 prep_report.('chans') = {EEGallchans.chanlocs(~ismember({EEGallchans.chanlocs(:).labels},{EEG.chanlocs(:).labels})).labels};
 
-%% Add keep channels if necessary
-for chi = 1:numel(keep_chans)
-    if ~ismember(keep_chans{1},{EEG.chanlocs(:).labels})
+%% Add no-interp-channels if necessary
+for chi = 1:numel(no_interp_chans)
+    if ~ismember(no_interp_chans{1},{EEG.chanlocs(:).labels})
         EEG.nbchan = EEG.nbchan+1;
         EEG.data(end+1,:) = chans_data(chi,:);
         EEG.chanlocs(1,EEG.nbchan)= chans_locs(chi);
@@ -56,8 +64,10 @@ EEG = fullRankAveRef(EEG);
 
 %% Discard channels to make the data full ranked
 if rank_deficit > 0
-    keep_chans = {'C3','C4'};
-    chns = find(ismember({EEG.chanlocs(:).labels}, keep_chans));
+    if isequal(no_discard_chans, 'all')
+        no_discard_chans = {EEG.chanlocs(:).labels};
+    end
+    chns = find(ismember({EEG.chanlocs(:).labels}, no_discard_chans));
     channelSubset = loc_subsets(EEG.chanlocs, EEG.nbchan-rank_deficit,false,false,{chns});
     EEG = pop_select( EEG,'channel', channelSubset{1});
     EEG = pop_chanedit(EEG, 'eval','chans = pop_chancenter( chans, [],[]);');
@@ -68,7 +78,6 @@ EEGtemp = pop_clean_rawdata(EEG, 'FlatlineCriterion','off','ChannelCriterion','o
 prep_report.('bursts_bICA') = EEG.xmax - EEGtemp.xmax; 
 prep_report.('burstsP_bICA') = prep_report.('bursts_bICA')/EEG.xmax*100;
      
-
 %% ICA
 EEGtemp = pop_runica(EEGtemp, 'icatype', 'runica','extended',1,'interrupt','on');
 
