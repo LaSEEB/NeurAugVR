@@ -81,7 +81,7 @@ prep_report.('bursts_bICA') = EEG.xmax - EEGtemp.xmax;
 prep_report.('burstsP_bICA') = prep_report.('bursts_bICA')/EEG.xmax*100;
      
 %% ICA
-EEGtemp = pop_runica(EEGtemp, 'icatype', 'runica','extended',1,'interrupt','on');
+EEGtemp = pop_runica(EEGtemp, 'icatype', 'runica','extended',0,'interrupt','on');
 
 %% Weight transfer
 EEG.icaweights = EEGtemp.icaweights;

@@ -75,7 +75,7 @@ end
 prep_report.('rej_chans') = {EEGallchans.chanlocs(~ismember({EEGallchans.chanlocs(:).labels},{EEG.chanlocs(:).labels})).labels};
 
 %% ICA
-EEG = pop_runica(EEG, 'icatype', 'runica','extended',1,'interrupt','on');
+EEG = pop_runica(EEG, 'icatype', 'runica','extended',0,'interrupt','on');
 
 %% Prun
 EEG = iclabel(EEG);

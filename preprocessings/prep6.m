@@ -81,7 +81,7 @@ prep_report.('bursts') = EEG.xmax - EEGtemp.xmax;
 prep_report.('burstsP') = prep_report.('bursts')/EEG.xmax*100;
             
 %% ICA
-EEGtemp = pop_runica(EEGtemp, 'icatype', 'runica','extended',1,'interrupt','on');
+EEGtemp = pop_runica(EEGtemp, 'icatype', 'runica','extended',0,'interrupt','on');
 
 %% Weight transfer
 EEG.icaweights = EEGtemp.icaweights;
@@ -113,7 +113,7 @@ globthresh = 3;
 superpose = 1;              % Different than default
 vistype = 0;
 plotflag = 0;
-[EEG, ~, ~, nrej1] = pop_jointprob(EEGdi, typerej, elec_comp, locthresh, globthresh, superpose, reject, vistype,[],plotflag);
+[EEG, ~, ~, nrej1] = pop_jointprob(EEGdi, typerej, elec_comp, locthresh, globthresh, superpose, ereject, vistype,[],plotflag);
 [EEG, ~, ~, nrej2] = pop_rejkurt(EEG, typerej, elec_comp,locthresh, globthresh, superpose, ereject, vistype);
 
 %% Report

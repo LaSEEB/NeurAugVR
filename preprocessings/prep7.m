@@ -79,7 +79,7 @@ prep_report.('rej_chans') = {EEGallchans.chanlocs(~ismember({EEGallchans.chanloc
 EEG = pop_epoch(EEG, dirs, elims, 'epochinfo', 'yes');
 
 %% ICA
-EEG = pop_runica(EEG, 'icatype', 'runica','extended',1,'interrupt','on');
+EEG = pop_runica(EEG, 'icatype', 'runica','extended',0,'interrupt','on');
 
 %% Prun
 EEG = iclabel(EEG);
@@ -104,13 +104,13 @@ globthresh = 3;
 superpose = 1;              % Different than default
 vistype = 0;
 plotflag = 0;
-[EEG, ~, ~, nrej1] = pop_jointprob(EEG, typerej, elec_comp, locthresh, globthresh, superpose, reject, vistype,[],plotflag);
+[EEG, ~, ~, nrej1] = pop_jointprob(EEG, typerej, elec_comp, locthresh, globthresh, superpose, ereject, vistype,[],plotflag);
 [EEG, ~, ~, nrej2] = pop_rejkurt(EEG, typerej, elec_comp,locthresh, globthresh, superpose, ereject, vistype);
 
 %% Report
-urevents_before = [EEGdi.event(ismember({EEGdi.event.type},dirs)).urevent];
+urevents_before = [EEGtemp.event(ismember({EEGtemp.event.type},dirs)).urevent];
 for di = 1:numel(dirs)
-    urevent_di_before = [EEGdi.event(strcmp({EEGdi.event(:).type}, dirs{di})).urevent];
+    urevent_di_before = [EEGtemp.event(strcmp({EEGtemp.event(:).type}, dirs{di})).urevent];
     urevent_di_after = [EEG.event(strcmp({EEG.event(:).type}, dirs{di})).urevent];
     kept = find(ismember(urevents_before,urevent_di_after));
     rej = find(ismember(urevents_before,urevent_di_before(~ismember(urevent_di_before,urevent_di_after))));
