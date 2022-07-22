@@ -36,46 +36,36 @@ for i = 1:numel(EEG.event)
     end
 end
 
-%% Prepare EO/EC markers for epoching
-% Find EC markers
-ec_ids = find(ismember({EEG.event.type},'Closed eyes'));
-switch numel(ec_ids)
-    case 0, disp('No Closed eyes marker found')
-    case 1, epoch_dur = 2*60;
-    case 2, epoch_dur = 1*60;
-    otherwise, disp('Too many Closed eyes marker found')
-end
-
-% Add/update EO markers
-start = 1;
-for i = 1:numel(ec_ids)
-    
-    EEG.event(ec_ids(i)).duration = epoch_dur;
-    EEG.event(ec_ids(i)).label = 'EC';
-    
-    eo_ids = find(ismember({EEG.event(start:ec_ids(i)).type},'Open eyes'));
-    
-    switch numel(eo_ids)
-        case 0
-            lat = EEG.event(ec_ids(i)).latency - epoch_dur*EEG.srate;
-            EEG = add_event(EEG,'Open eyes',lat);
-            EEG.event(ismember({EEG.event(start:ec_ids(i)).type},'Open eyes')).duration = epoch_dur;
-            EEG.event(ismember({EEG.event(start:ec_ids(i)).type},'Open eyes')).label = 'EO';
-        case 1
-            EEG.event(eo_ids(1)).duration = epoch_dur;
-            EEG.event(eo_ids(1)).label = 'EO';
-        otherwise
-            disp('Too many Open eyes markers found!')
-            break
-    end
-    start = ec_ids(i) + 1;
-end
-
-% Remove extra EO markers at the end
-EEG.event(ismember({EEG.event(start:end).type},'Open eyes')) = [];
-for i = 1:size(EEG.event,1)
-    EEG.event(i).urevent = i;
-end
+% % Add/update EO markers
+% start = 1;
+% for i = 1:numel(ec_ids)
+%     
+%     EEG.event(ec_ids(i)).duration = epoch_dur;
+%     EEG.event(ec_ids(i)).label = 'EC';
+%     
+%     eo_ids = find(ismember({EEG.event(start:ec_ids(i)).type},'Open eyes'));
+%     
+%     switch numel(eo_ids)
+%         case 0
+%             lat = EEG.event(ec_ids(i)).latency - epoch_dur*EEG.srate;
+%             EEG = add_event(EEG,'Open eyes',lat);
+%             EEG.event(ismember({EEG.event(start:ec_ids(i)).type},'Open eyes')).duration = epoch_dur;
+%             EEG.event(ismember({EEG.event(start:ec_ids(i)).type},'Open eyes')).label = 'EO';
+%         case 1
+%             EEG.event(eo_ids(1)).duration = epoch_dur;
+%             EEG.event(eo_ids(1)).label = 'EO';
+%         otherwise
+%             disp('Too many Open eyes markers found!')
+%             break
+%     end
+%     start = ec_ids(i) + 1;
+% end
+% 
+% % Remove extra EO markers at the end
+% EEG.event(ismember({EEG.event(start:end).type},'Open eyes')) = [];
+% for i = 1:size(EEG.event,1)
+%     EEG.event(i).urevent = i;
+% end
 
 %% Epoch
 EEGEO = epoch_and_merge(EEG, 'EO');
