@@ -19,6 +19,23 @@ if EEG.srate ~= fs
     end
 end
 
+%% Prepare EO/EC markers for epoching for Inês
+marker = '3385';
+epoch_dur = 1*60;
+c = 1;
+for i = 1:numel(EEG.event)
+    if strcmp(EEG.event(i).type,marker)
+        EEG.event(i).duration = epoch_dur;
+        switch c
+            case 1, EEG.event(i).label = 'EO';
+            case 2, EEG.event(i).label = 'EC';
+            case 3, EEG.event(i).label = 'EO';
+            case 4, EEG.event(i).label = 'EC';
+        end 
+        c = c + 1;
+    end
+end
+
 %% Prepare EO/EC markers for epoching
 % Find EC markers
 ec_ids = find(ismember({EEG.event.type},'Closed eyes'));
