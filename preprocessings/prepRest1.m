@@ -1,4 +1,4 @@
-function EEG = prep8(EEG,resamp,hp,lp,no_interp_chans,no_discard_chans)
+function EEG = prepRest1(EEG,resamp,hp,lp,no_interp_chans,no_discard_chans)
 % E.g. 1:
 % resamp = 250
 % hp = 1
@@ -75,8 +75,19 @@ if rank_deficit > 0
 end
 prep_report.('rej_chans') = {EEGallchans.chanlocs(~ismember({EEGallchans.chanlocs(:).labels},{EEG.chanlocs(:).labels})).labels};
 
+%% Continuous clean
+EEGtemp = pop_clean_rawdata(EEG, 'FlatlineCriterion','off','ChannelCriterion','off','LineNoiseCriterion','off','Highpass','off','BurstCriterion',20,'WindowCriterion',0.5,'BurstRejection','on','Distance','Euclidian','WindowCriterionTolerances',[-Inf 8] );
+prep_report.('bursts_bICA') = EEG.xmax - EEGtemp.xmax; 
+prep_report.('burstsP_bICA') = prep_report.('bursts_bICA')/EEG.xmax*100;
+     
 %% ICA
-EEG = pop_runica(EEG, 'icatype', 'runica','extended',1,'interrupt','on');
+EEGtemp = pop_runica(EEGtemp, 'icatype', 'runica','extended',1,'interrupt','on');
+
+%% Weight transfer
+EEG.icaweights = EEGtemp.icaweights;
+EEG.icasphere = EEGtemp.icasphere;
+EEG.icachansind = EEGtemp.icachansind;
+EEG.icawinv = EEGtemp.icawinv;
 
 %% Prun
 EEG = iclabel(EEG);
