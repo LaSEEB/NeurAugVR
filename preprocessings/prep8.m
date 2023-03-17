@@ -75,8 +75,19 @@ if rank_deficit > 0
 end
 prep_report.('rej_chans') = {EEGallchans.chanlocs(~ismember({EEGallchans.chanlocs(:).labels},{EEG.chanlocs(:).labels})).labels};
 
+%% Continuous clean
+EEGtemp = pop_clean_rawdata(EEG, 'FlatlineCriterion','off','ChannelCriterion','off','LineNoiseCriterion','off','Highpass','off','BurstCriterion',20,'WindowCriterion',0.5,'BurstRejection','on','Distance','Euclidian','WindowCriterionTolerances',[-Inf 8] );
+prep_report.('bursts_bICA') = EEG.xmax - EEGtemp.xmax;
+prep_report.('burstsP_bICA') = prep_report.('bursts_bICA')/EEG.xmax*100;
+
 %% ICA
-EEG = pop_runica(EEG, 'icatype', 'runica','extended',1,'interrupt','on');
+EEGtemp = pop_runica(EEGtemp, 'icatype', 'runica','extended',1,'interrupt','on');
+
+%% Weight transfer
+EEG.icaweights = EEGtemp.icaweights;
+EEG.icasphere = EEGtemp.icasphere;
+EEG.icachansind = EEGtemp.icachansind;
+EEG.icawinv = EEGtemp.icawinv;
 
 %% Prun
 EEG = iclabel(EEG);
@@ -97,6 +108,7 @@ EEGtemp = pop_clean_rawdata(EEG, 'FlatlineCriterion','off','ChannelCriterion','o
 bursts_aICA_rej_mask = sum(abs(EEG.data-EEGtemp.data),1) >= 1e-10;
 bursts_aICA = sum(bursts_aICA_rej_mask)/EEG.srate;
 prep_report.('rej_segments') = bursts_aICA/EEG.xmax*100;
+EEG = EEGtemp;
 
 %% Report
 % fprintf(strcat('Prep 8 report\nChans removed: ',repmat('%s ',1,numel(prep_report.('chans'))),'\nBursts removed before ICA: %0.0f (%0.0f%%)\nComps removed: %d\nBursts removed after ICA: %0.0f (%0.0f%%)\n'),prep_report.('chans'){:},prep_report.('bursts_bICA'),prep_report.('burstsP_bICA'),prep_report.('comps'),prep_report.('bursts_aICA'),prep_report.('burstsP_aICA'));
