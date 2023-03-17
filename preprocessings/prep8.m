@@ -108,7 +108,15 @@ EEGtemp = pop_clean_rawdata(EEG, 'FlatlineCriterion','off','ChannelCriterion','o
 bursts_aICA_rej_mask = sum(abs(EEG.data-EEGtemp.data),1) >= 1e-10;
 bursts_aICA = sum(bursts_aICA_rej_mask)/EEG.srate;
 prep_report.('rej_segments') = bursts_aICA/EEG.xmax*100;
+prep_report.('rej_segments_mask') = bursts_aICA_rej_mask;
+
 EEG = EEGtemp;
+% - If you want to interpolate bad segments, use: 'BurstRejection','off' [default]
+% - If you want to remove bad segments, use: 'BurstRejection','on'
+% - If you don't want to remove/interpolate bad segments, but just identify
+% them, comment the previous line "EEG = EEGtemp", and after preprocessing,
+% check EEG.preproc.rej_segments_mask to know which time instances were
+% interpolated (1) and which were not (0)
 
 %% Report
 % fprintf(strcat('Prep 8 report\nChans removed: ',repmat('%s ',1,numel(prep_report.('chans'))),'\nBursts removed before ICA: %0.0f (%0.0f%%)\nComps removed: %d\nBursts removed after ICA: %0.0f (%0.0f%%)\n'),prep_report.('chans'){:},prep_report.('bursts_bICA'),prep_report.('burstsP_bICA'),prep_report.('comps'),prep_report.('bursts_aICA'),prep_report.('burstsP_aICA'));
