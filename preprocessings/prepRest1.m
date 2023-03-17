@@ -103,7 +103,7 @@ EEG = EEGtemp;
 % - If you want to interpolate bad segments, use: 'BurstRejection','off' [default]
 % - If you want to remove bad segments, use: 'BurstRejection','on'
 % - If you don't want to remove/interpolate bad segments, but just identify
-% them, comment the previous line "EEGtemp = EEG", and after preprocessing,
+% them, comment the previous line "EEG = EEGtemp", and after preprocessing,
 % check EEG.preproc.rej_segments_mask to know which time instances were
 % interpolated (1) and which were not (0)
 
