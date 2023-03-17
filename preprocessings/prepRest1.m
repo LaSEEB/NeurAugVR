@@ -99,7 +99,7 @@ bursts_aICA = sum(bursts_aICA_rej_mask)/EEG.srate;
 prep_report.('rej_segments') = bursts_aICA/EEG.xmax*100;
 prep_report.('rej_segments_mask') = bursts_aICA_rej_mask;
 
-EEGtemp = EEG;
+EEG = EEGtemp;
 % - If you want to interpolate bad segments, use: 'BurstRejection','off' [default]
 % - If you want to remove bad segments, use: 'BurstRejection','on'
 % - If you don't want to remove/interpolate bad segments, but just identify
