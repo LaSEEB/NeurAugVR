@@ -89,7 +89,7 @@ end
 EEG = pop_subcomp(EEG, rej_vec, 0);
 
 %% Report
-prep_report.('rej_comps') = numel(rej_vec);
+prep_report.('rej_comps') = rej_vec;
 % fprintf(strcat('Prep 4 report\nChans interpolated: ',repmat('%s ',1,numel(prep_report.('chans'))),'\nComps removed: %d\n'),prep_report.('chans'){:},prep_report.('comps'));
 EEG.preproc = prep_report;
 

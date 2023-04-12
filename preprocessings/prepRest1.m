@@ -90,7 +90,7 @@ for n = 1:size(iclabel_mat,1) % For each IC, determine if it is to reject
     end
 end
 EEG = pop_subcomp(EEG, rej_vec, 0);
-prep_report.('rej_comps') = numel(rej_vec);
+prep_report.('rej_comps') = rej_vec;
 
 %% Continuous clean: remove and interpolate bursts
 EEGtemp = pop_clean_rawdata(EEG, 'FlatlineCriterion','off','ChannelCriterion','off','LineNoiseCriterion','off','Highpass','off','BurstCriterion',20,'WindowCriterion','off','BurstRejection','off','Distance','Euclidian');

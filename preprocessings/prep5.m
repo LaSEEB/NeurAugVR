@@ -91,7 +91,7 @@ end
 EEG = pop_subcomp(EEG, rej_vec, 0);
 
 % Report
-prep_report.('rej_comps') = numel(rej_vec);
+prep_report.('rej_comps') = rej_vec;
 
 %% Epoch
 EEGdi = pop_epoch(EEG, dirs, elims, 'epochinfo', 'yes');

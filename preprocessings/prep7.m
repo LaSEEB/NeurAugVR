@@ -93,7 +93,7 @@ for n = 1:size(iclabel_mat,1) % For each IC, determine if it is to reject
     end
 end
 EEG = pop_subcomp(EEG, ica_rej_vec, 0);
-prep_report.('rej_comps') = numel(ica_rej_vec);
+prep_report.('rej_comps') = ica_rej_vec;
 
 %% Clean trials
 EEGtemp = EEG;
